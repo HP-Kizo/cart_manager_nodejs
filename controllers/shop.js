@@ -1,10 +1,11 @@
 const Product = require("../models/product");
 const Cart = require("../models/cart");
+const { where } = require("sequelize");
 exports.getProducts = (req, res, next) => {
-  Product.fetchAll()
-    .then(([rows, fieldData]) => {
+  Product.findAll()
+    .then((products) => {
       res.render("shop/product-list", {
-        prods: rows,
+        prods: products,
         pageTitle: "All Products",
         path: "/products",
       });
@@ -13,10 +14,10 @@ exports.getProducts = (req, res, next) => {
 };
 
 exports.getIndex = (req, res, next) => {
-  Product.fetchAll()
-    .then(([rows, fieldData]) => {
+  Product.findAll()
+    .then((products) => {
       res.render("shop/index", {
-        prods: rows,
+        prods: products,
         pageTitle: "Shop",
         path: "/",
       });
@@ -75,8 +76,8 @@ exports.getCheckout = (req, res, next) => {
 
 exports.getProduct = (req, res, next) => {
   const prodID = req.params.productID;
-  Product.findByID(prodID)
-    .then(([product]) => {
+  Product.findByPk(prodID)
+    .then((product) => {
       console.log(product);
       res.render("shop/product-detail", {
         product: product,
@@ -87,12 +88,28 @@ exports.getProduct = (req, res, next) => {
     .catch((err) => console.log(err));
   // res.redirect("/");
 };
+// exports.getProduct = (req, res, next) => {
+//   const prodId = req.params.productID;
+//   Product.findAll({ where: { id: prodId } })
+//     .then((product) => {
+//       res.render("shop/product-detail", {
+//         product: product[0],
+//         path: "",
+//         pageTitle: product.title,
+//       });
+//     })
+//     .catch((err) => console.log(err));
+// };
 
 exports.postDeleteItem = (req, res, next) => {
   const prodID = req.body.productID;
-  Product.findByID(prodID, (product) => {
-    console.log("Test", product);
-    Cart.deleteProduct(prodID, product.price);
-    res.redirect("/cart");
-  });
+  Product.findByPk(prodID)
+    .then((product) => {
+      product.destroy();
+    })
+    .then((res) => {
+      console.log("DELETED PRODUCT");
+      res.redirect("/admin/products");
+    })
+    .catch((err) => console.log(err));
 };

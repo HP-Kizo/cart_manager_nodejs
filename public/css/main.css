@@ -18,6 +18,8 @@ main {
 form {
   display: inline;
 }
+.image {
+}
 .centered {
   text-align: center;
 }
